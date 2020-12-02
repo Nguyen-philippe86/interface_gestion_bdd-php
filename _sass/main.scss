@@ -1,0 +1,13 @@
+@charset "utf-8";
+@import "fonts.scss";
+@import "../node_modules/bulma/sass/utilities/initial-variables";
+
+html {
+    font-family: $montserrat, sans-serif;
+}
+.hero{
+    background-image: src("/images/pexels-photo-325185.jpeg");
+}
+$navbar-item-img-max-height : 100px !default;
+
+@import "../node_modules/bulma/bulma";
