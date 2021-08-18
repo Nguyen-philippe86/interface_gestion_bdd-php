@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require 'includes/config.php';
 
 // INSCRIPTION
@@ -49,7 +49,7 @@ function connexion($username_login, $pass_login)
         if (password_verify($pass_login, $db_pass)) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['id'] = $user['id'];
-            header('Location: index.php?');
+            header('Location: profil.php?');
         } else {
             echo '<div class="notification is-danger is-light"
         <button class="delete"></button>
@@ -63,104 +63,223 @@ function connexion($username_login, $pass_login)
         </div>';
     }
 }
-// AJOUT PRODUIT
-function ajoutAnnonce($title, $price, $description, $address, $city, $author)
+// AJOUTER UN PRODUITS
+function ajoutProduits($name, $reference, $alert, $price, $quantity, $category, $user_id)
 {
     global $conn;
-    // Vérification du prix (doit être un entier, et inférieur à 1 million d'euros)
-    if (is_int($price) && $price > 0 && $price < 1000000) {
-        // Utilisation du try/catch pour capturer les erreurs PDO/SQL
-        try {
-            // Création de la requête avec tous les champs du formulaire
-            $sth = $conn->prepare('INSERT INTO adverts (title,description,price,city,address,author) VALUES (:title, :description, :price, :city, :address, :author)');
-            $sth->bindValue(':title', $title, PDO::PARAM_STR);
-            $sth->bindValue(':price', $price, PDO::PARAM_INT);
-            $sth->bindValue(':description', $description, PDO::PARAM_STR);
-            $sth->bindValue(':address', $address, PDO::PARAM_STR);
-            $sth->bindValue(':city', $city, PDO::PARAM_STR);
-            $sth->bindValue(':author', $author, PDO::PARAM_INT);
-            // Affichage conditionnel du message de réussite
-            if ($sth->execute()) {
-                echo "<div class='alert alert-success'> Votre annonce a été ajouté</div>";
-                header('Location: profil.php?id='.$conn->lastInsertId());
-            }
-        } catch (PDOException $e) {
-            echo 'Error: '.$e->getMessage();
+
+    try {
+        $sth = $conn->prepare('INSERT INTO products (products_name,reference,alert,price,quantity,category_id,user_id) 
+        VALUES (:products_name, :reference, :alert, :price, :quantity, :category_id, :user_id)');
+        $sth->bindValue(':products_name', $name, PDO::PARAM_STR);
+        $sth->bindValue(':reference', $reference, PDO::PARAM_STR);
+        $sth->bindValue(':alert', $alert, PDO::PARAM_STR);
+        $sth->bindValue(':price', $price, PDO::PARAM_STR);
+        $sth->bindValue(':quantity', $quantity, PDO::PARAM_INT);
+        $sth->bindValue(':category_id', $category, PDO::PARAM_INT);
+        $sth->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        if ($sth->execute()) {
+            echo "<div class='container'>
+                    <article class='message is-link'>
+                        <div class='message-header'>Info<a href='profil.php'><button class='delete'></button></a></div>
+                        <div class='message-body'>Le produit a bien été ajouté à la base de données</div>
+                    </article>
+                </div><br>";
         }
+    } catch (PDOException $e) {
+        echo 'Error: '.$e->getMessage();
     }
 }
-// FONCTION D'AFFICHAGE DE LA LISTE DES PRODUITS
+// AJOUTER UNE CATEGORIE"
+function ajoutCategorie($addCategory)
+{
+    global $conn;
+
+    try {
+        $sth = $conn->prepare('INSERT INTO categories (categories_name) VALUES (:categories_name)');
+        $sth->bindValue(':categories_name', $addCategory, PDO::PARAM_STR);
+        if ($sth->execute()) {
+            header('Location: add_products.php?id='.$conn->lastInsertId());
+        }
+    } catch (PDOException $e) {
+        echo 'Error: '.$e->getMessage();
+    }
+}
+// AFFICHAGE PRODUIT PAGE "INDEX.PHP"
+
 function affichageProduits()
 {
     global $conn;
-    // Requête SQL
-    $sth = $conn->prepare('SELECT p.*,c.categories_name,u.username FROM products AS p LEFT JOIN categories AS c ON p.category_id = c.categories_id LEFT JOIN users AS u ON p.user_id = u.id');
-    $sth->execute(); //Exécution de requête
 
+    $sth = $conn->prepare('SELECT p.*,c.categories_name,u.username 
+    FROM products AS p 
+    LEFT JOIN categories AS c ON p.category_id = c.categories_id 
+    LEFT JOIN users AS u ON p.user_id = u.id 
+    ORDER BY category_id, products_name');
+    $sth->execute();
     $products = $sth->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($products as $product) {
-        //Pour chaque produit '$produit' de la table '$products'...
-        // on crée les éléments HTML suivant :?>
-        <div class="container">
-            <div class="row">
-                <tr>
-                    <td><?php echo $product['products_name']; ?>
-                    </td>
-                    <td><?php echo $product['reference']; ?>
-                    </td>
-                    <td><?php echo $product['price']; ?>
-                    </td>
-                    <td><?php echo $product['quantity']; ?>
-                    </td>
-                    <td><?php echo $product['categories_name']; ?>
-                    </td>
-                    <td><?php echo $product['username']; ?>
-                    </td>
-                    <td> <a
-                            href="product.php?id=<?php echo $product['products_id']; ?>">Afficher
-                            l'article</a>
-                    </td>
-                </tr>
-            </div>
-        </div>
+    foreach ($products as $product) {?>
+
+<div class="container">
+    <div class="row">
+        <tr>
+            <td><?php echo $product['categories_name']; ?>
+            </td>
+            <td><?php echo $product['products_name']; if ($product['alert'] >= $product['quantity']) {
+        echo "<strong>
+                <span class='icon-text has-text-danger'>
+                    <span class='icon'>
+                        <i class='fas fa-exclamation-triangle'></i>
+                    </span>
+                    <span>Stock faible</span>     
+                </span>
+            </strong>";
+    }?>
+            </td>
+            <th class="is-warning"><strong><?php echo $product['quantity']; ?>
+                </strong>
+            </th>
+            <td><?php echo $product['reference']; ?>
+            </td>
+            <td><?php echo $product['price']; ?>
+            </td>
+            <td><?php echo $product['username']; ?>
+            </td>
+        </tr>
+    </div>
+</div>
 <?php
     }
 }
-// AFFICHAGE PRODUIT DE L'UTILISATEUR
-function affichageAdvertsByUser($user_id)
+
+// AFFICHAGE PRODUIT PAGE "PROFIL.PHP"
+function affichageProduitByUser()
 {
     global $conn;
-    $sth = $conn->prepare("SELECT * FROM products INNER JOIN users ON products.user_id = users.id WHERE user_id = {$user_id}");
-    $sth->execute();
 
+    $sth = $conn->prepare('SELECT p.*,c.categories_name,u.username FROM products AS p LEFT JOIN categories AS c ON p.category_id = c.categories_id LEFT JOIN users AS u ON p.user_id = u.id ORDER BY category_id, products_name');
+    $sth->execute();
     $products = $sth->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($products as $products) {
-        ?>
+    foreach ($products as $product) {?>
+
 <tr>
-    <th scope="row"><?php echo $products['products_name']; ?>
+    <td><?php echo $product['categories_name']; ?>
+    </td>
+    <td><?php echo $product['products_name']; if ($product['alert'] >= $product['quantity']) {
+        echo "<strong>
+                <span class='icon-text has-text-danger'>
+                    <span class='icon'>
+                        <i class='fas fa-exclamation-triangle'></i>
+                    </span>
+                    <span>Stock faible</span>     
+                </span>
+            </strong>";
+    }?>
+    </td>
+    <th class="is-warning">
+        <strong><?php echo $product['quantity']; ?>
+        </strong>
     </th>
-    <td><?php echo $products['reference']; ?>
+    <td><?php echo $product['reference']; ?>
     </td>
-    <td><?php echo $products['price']; ?>
+    <td><?php echo $product['price']; ?>
     </td>
-    <td><?php echo $products['quantity']; ?> $
+    <td><?php echo $product['username']; ?>
     </td>
-    <td><?php echo $products['category_id']; ?>
-    </td>
-    <td> <a href="product.php?id=<?php echo $products['products_id']; ?>"
-            class="fa btn btn-outline-primary"><i class="fas fa-eye"></i></a>
-    </td>
-    <td> <a href="edit_products.php?id=<?php echo $products['products_id']; ?>"
-            class="fa btn btn-outline-warning"><i class="fas fa-pen"></i></a>
-    </td>
-    <td>
-        <form action="process.php" method="POST">
-            <input type="hidden" name="ad_id"
-                value="<?php echo $products['ad_id']; ?>
-            <input type="submit" name="products_delete" class="fa btn btn-outline-danger" value="&#xf2ed;"></input>
-        </form>
+    <td> <a href="edit_products.php?id=<?php echo $product['products_id']; ?>"
+            class="btn btn-outline-danger"><i class="fas fa-pen"></i></a></td>
     </td>
 </tr>
+
 <?php
+    }
+}
+// MODIFICATION DE PRODUITS
+function modifProduits($name, $reference, $alert, $price, $quantity, $category, $id, $user_id)
+{
+    global $conn;
+
+    try {
+        $sth = $conn->prepare('UPDATE products 
+        SET products_name=:products_name, reference=:reference, price=:price, alert=:alert, quantity=:quantity, category_id=:category_id
+        WHERE products_id=:products_id AND user_id=:user_id');
+        $sth->bindValue(':products_name', $name);
+        $sth->bindValue(':reference', $reference);
+        $sth->bindValue(':alert', $alert);
+        $sth->bindValue(':price', $price);
+        $sth->bindValue(':quantity', $quantity);
+        $sth->bindValue(':category_id', $category);
+        $sth->bindValue(':products_id', $id);
+        $sth->bindValue(':user_id', $user_id);
+        if ($sth->execute()) {
+            echo "<div class='container'>
+            <article class='message is-link'>
+                <div class='message-header'>Info<a href='profil.php'><button class='delete'></button></a></div>
+                <div class='message-body'>Votre modification a bien été prise en compte </div>
+            </article>
+        </div><br>";
+        }
+    } catch (PDOException $e) {
+        echo 'Error : '.$e->getMessage();
+    }
+}
+
+////////////////////////////// TABLETTE //////////////////////////////
+
+// AFFICHAGE PRODUIT PAGE "TAB.PHP"
+function pageTablette()
+{
+    global $conn;
+
+    $sth = $conn->prepare('SELECT p.*,c.categories_name,u.username FROM products AS p LEFT JOIN categories AS c ON p.category_id = c.categories_id LEFT JOIN users AS u ON p.user_id = u.id ORDER BY category_id, products_name');
+    $sth->execute();
+    $products = $sth->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($products as $product) {?>
+<tr>
+    <td><?php echo $product['categories_name']; ?>
+    </td>
+    <td><?php echo $product['products_name']; if ($product['alert'] >= $product['quantity']) {
+        echo "<strong>
+                <span class='icon-text has-text-danger'>
+                    <span class='icon'>
+                        <i class='fas fa-exclamation-triangle'></i>
+                    </span>
+                    <span>Stock faible</span>     
+                </span>
+            </strong>";
+    }?>
+    </td>
+    <th class="is-warning">
+        <form action="process.php" method="POST">
+            <input type="number" name="quantity_tab"
+                value="<?php echo $product['quantity']; ?>" />
+            <input type="hidden" name="product_id"
+                value="<?php echo $product['products_id']; ?>" />
+            <input type="submit" name="updateTab" class="fa btn btn-primary" value="&#xf00c;"></input>
+        </form>
+    </th>
+</tr>
+<?php
+    }
+}
+// MODIFICATION QUANTITE PAGE "TAB.PHP"
+function modifTablette($quantity, $id)
+{
+    global $conn;
+
+    try {
+        $sth = $conn->prepare('UPDATE products SET quantity=:quantity WHERE products_id=:products_id');
+        $sth->bindValue(':quantity', $quantity);
+        $sth->bindValue(':products_id', $id);
+        if ($sth->execute()) {
+            echo "<div class='container'>
+                    <article class='message is-link'>
+                        <div class='message-header'>Info<a href='tab.php'><button class='delete'></button></a></div>
+                        <div class='message-body'>Votre modification a bien été prise en compte </div>
+                    </article>
+                </div><br>";
+        }
+    } catch (PDOException $e) {
+        echo 'Error : '.$e->getMessage();
     }
 }

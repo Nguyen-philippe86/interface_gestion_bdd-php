@@ -1,18 +1,21 @@
 <?php
 
 $title = 'Nouveau profil';
+
 require 'includes/header.php';
 
-if (!empty($_POST['submit_signup']) && !empty($_POST['username_signup']) && !empty($_POST['password1_signup'])) {
-    $pass_su = htmlspecialchars($_POST['password1_signup']);
+if (!empty($_POST['submit_signup']) && !empty($_POST['username_signup']) && !empty($_POST['password1_signup'])) { // Condition pour une inscription
+    $pass_su = htmlspecialchars($_POST['password1_signup']); // sécurité htmlspecialchars
     $repass_su = htmlspecialchars($_POST['password2_signup']);
     $username_su = htmlspecialchars($_POST['username_signup']);
     inscription($username_su, $pass_su, $repass_su);
 }
 ?>
+<!--formulaire pour créer un nouveau profil-->
 <div class="container">
     <div class="columns">
         <div class="column">
+
             <h2 class="title is-3">Nouveau profil</h2>
             <form
                 action="<?php $_SERVER['REQUEST_URI']; ?>"
@@ -44,6 +47,7 @@ if (!empty($_POST['submit_signup']) && !empty($_POST['username_signup']) && !emp
                     </div>
                 </div>
             </form>
+            <br>
         </div>
     </div>
 </div>
