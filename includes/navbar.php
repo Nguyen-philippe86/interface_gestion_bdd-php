@@ -1,11 +1,10 @@
-﻿<!--navbar d'acceuil-->
-<nav class="navbar navbar-expand-lg navbar-dark mb-3">
+﻿<nav class="navbar navbar-expand-lg navbar-dark mb-3" style="display: none">
     <div class="navbar-brand">
         <a class="navbar-item" href="index.php"><img src="images/logo.png" width=300 height=300></a>
     </div>
 
     <button class="navbar-toggler button is-medium is-rounded is-outlined is-dark" type="button" data-toggle="collapse"
-        data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span><i class="fas fa-ellipsis-v"></i></span>
     </button>
 
@@ -20,51 +19,95 @@
 
         <!--Menu déroulant qui s'affiche uniquement lorsqu'on est connectée-->
         <?php if (!empty($_SESSION)) { ?>
-        <div id="navbarText" class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="navbar-item">
-                    <div class="navbar-start">
-                        <a class="navbar-item" href="tab.php?id">Modifier le stock</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <ul class="navbar-nav">
-            <div class="dropdown nav-item dropleft">
+            <div id="navbarText" class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="navbar-item">
+                        <div class="navbar-start">
+                            <a class="navbar-item" href="tab.php?id">Modifier le stock</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <ul class="navbar-nav">
+                <div class="dropdown nav-item dropleft">
 
-                <div class="navbar-end">
-                    <div class="navbar-item dropdown dropleft is-hoverable">
-                        <a href="#" class="button is-rounded is-outlined dropdown-toggle" role="button"
-                            id="dropdownMenuLink" data-toggle="dropdown"><span><?php echo $_SESSION['username']; ?></span><span
-                                class="icon is-large">
+                    <div class="navbar-end">
+                        <div class="navbar-item dropdown dropleft is-hoverable">
+                            <a href="#" class="button is-rounded is-outlined dropdown-toggle" role="button"
+                               id="dropdownMenuLink"
+                               data-toggle="dropdown"><span><?php echo $_SESSION['username']; ?></span><span
+                                        class="icon is-large">
                                 <i class="fas fa-user-circle fa-lg"></i></span></a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                            <a class="dropdown-item" href="profil.php">Interface manager</a>
-                            <a class="dropdown-item" href="add_products.php">Ajouter un produit</a>
-                            <a class="dropdown-item" href="add_profil.php">Créer un nouveau profil</a>
-                            <a class="dropdown-item" href="tab.php">Modifier stock</a>
-                            <hr>
-                            <a class="dropdown-item" href="?logout">Déconnexion</a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                <a class="dropdown-item" href="profil.php">Interface manager</a>
+                                <a class="dropdown-item" href="add_products.php">Ajouter un produit</a>
+                                <a class="dropdown-item" href="add_profil.php">Créer un nouveau profil</a>
+                                <a class="dropdown-item" href="tab.php">Modifier stock</a>
+                                <hr>
+                                <a class="dropdown-item" href="?logout">Déconnexion</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </ul>
-        <?php
-            } else {
-                ?>
-        <!--Sinon affiche le bouton qui sert à se connecter pour afficher le menu déroulant-->
-        <ul>
-            <li class="nav-item">
-                <div class="navbar-item">
-                    <div class="buttons">
-                        <a class="button is-link" href="signin.php"><strong>Se connecter</strong></a>
+            </ul>
+            <?php
+        } else {
+            ?>
+            <!--Sinon affiche le bouton qui sert à se connecter pour afficher le menu déroulant-->
+            <ul>
+                <li class="nav-item">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-link" href="signin.php"><strong>Se connecter</strong></a>
+                        </div>
                     </div>
-                </div>
-            </li>
-        </ul>
-        <?php
-            } ?>
+                </li>
+            </ul>
+            <?php
+        } ?>
 
     </div>
+</nav>
+
+<nav class="nav__menu">
+    <div>
+        <a href="index.php"><img src="images/logo.png" width=300 height=300></a>
+    </div>
+    <?php if (!empty($_SESSION)) : ?>
+    <button class="click">Click me!</button>
+        <div>
+            <ul>
+                <li>
+                    <a href="tab.php?id">Modifier le stock</a>
+                </li>
+            </ul>
+        </div>
+        <div class="menu">
+            <ul>
+                <li>
+                    <a href="#"><span><?php echo $_SESSION['username']; ?></span><span><i
+                                    class="fas fa-user-circle fa-lg"></i></span></a>
+                </li>
+                <li>
+                    <a href="profil.php">Interface manager</a>
+                </li>
+                <li>
+                    <a href="add_products.php">Ajouter un produit</a>
+                </li>
+                <li>
+                    <a href="add_profil.php">Créer un nouveau profil</a>
+                </li>
+                <li>
+                    <a href="tab.php">Modifier stock</a>
+                </li>
+                <li>
+                    <a href="?logout">Déconnexion</a>
+                </li>
+            </ul>
+        </div>
+    <?php else : ?>
+        <div>
+            <a href="signin.php"><strong>Se connecter</strong></a>
+        </div>
+    <?php endif; ?>
 </nav>
